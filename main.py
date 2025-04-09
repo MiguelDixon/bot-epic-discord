@@ -22,7 +22,7 @@ def buscar_jogos_gratis_semana():
     dados = response.json()
 
     jogos = dados['data']['Catalog']['searchStore']['elements']
-    agora = datetime.datetime.now(datetime.timezone.utc)
+    agora = datetime.now(timezone.utc)
     jogos_gratis = []
 
     for jogo in jogos:
