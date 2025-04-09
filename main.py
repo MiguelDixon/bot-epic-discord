@@ -35,7 +35,7 @@ def buscar_jogos_gratis_semana():
             continue
 
         for oferta in ofertas_ativas[0]['promotionalOffers']:
-            inicio = datetime.datetime.fromisoformat(oferta['startDate'].replace('Z', '+00:00'))
+            inicio = datetime.fromisoformat(oferta['startDate'].replace('Z', '+00:00'))
             fim = datetime.datetime.fromisoformat(oferta['endDate'].replace('Z', '+00:00'))
 
             if inicio <= agora <= fim:
