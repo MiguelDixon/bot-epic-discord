@@ -14,7 +14,7 @@ def run_web():
 
 Thread(target=run_web).start()
 
-def buscar_jogo_gratis_epic():
+def buscar_jogos_gratis_semana():
     url = "https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=pt-BR&country=BR"
     response = requests.get(url)
     dados = response.json()
@@ -22,51 +22,58 @@ def buscar_jogo_gratis_epic():
     jogos = dados['data']['Catalog']['searchStore']['elements']
     agora = datetime.datetime.now(datetime.timezone.utc)
 
+    jogos_gratis = []
+
     for jogo in jogos:
         promocoes = jogo.get('promotions')
         if not promocoes:
             continue
 
-        ofertas_ativas = promocoes.get('promotionalOffers')
-        if ofertas_ativas:
-            for oferta in ofertas_ativas[0]['promotionalOffers']:
+        todas_ofertas = []
+        if promocoes.get('promotionalOffers'):
+            todas_ofertas += promocoes['promotionalOffers']
+        if promocoes.get('upcomingPromotionalOffers'):
+            todas_ofertas += promocoes['upcomingPromotionalOffers']
+
+        for grupo in todas_ofertas:
+            for oferta in grupo.get('promotionalOffers', []):
                 inicio = datetime.datetime.fromisoformat(oferta['startDate'].replace('Z', '+00:00'))
                 fim = datetime.datetime.fromisoformat(oferta['endDate'].replace('Z', '+00:00'))
 
                 if inicio <= agora <= fim:
                     desconto = oferta.get('discountSetting', {}).get('discountPercentage', 0)
-                    if desconto == 0:
-                        continue  # não é grátis
+                    if desconto == 100:
+                        titulo = jogo['title']
+                        imagem = jogo['keyImages'][0]['url']
+                        try:
+                            slug = jogo['catalogNs']['mappings'][0]['pageSlug']
+                            link = f"https://store.epicgames.com/pt-BR/p/{slug}"
+                        except:
+                            link = "https://store.epicgames.com/pt-BR/free-games"
+                        jogos_gratis.append((titulo, link, imagem))
 
-                    titulo = jogo['title']
-                    imagem = jogo['keyImages'][0]['url']
-                    try:
-                        slug = jogo['catalogNs']['mappings'][0]['pageSlug']
-                        link = f"https://store.epicgames.com/pt-BR/p/{slug}"
-                    except:
-                        link = "https://store.epicgames.com/pt-BR/free-games"
-
-                    return titulo, link, imagem
-    return None, None, None
-
+    return jogos_gratis
 def enviar_mensagem_discord():
     webhook_url = 'https://discord.com/api/webhooks/1359351359081681036/n7yVuIwZv4Hnrt3eUol18-x5i3ytid5Mjmhd4ajQK0GEvDvVPmTH5EwLOu_4rYaXjhjS'
-    titulo, link, imagem = buscar_jogo_gratis_epic()
+    jogos = buscar_jogos_gratis_semana()
 
-    if titulo and link and imagem:
-        embed = {
-            "title": f"🎮 {titulo}",
-            "description": f"🆓 Jogo grátis da semana na Epic Games!\n🔗 [Resgatar agora]({link})",
-            "image": {"url": imagem},
-            "color": 16753920  # Amarelinho bonito
-        }
+    if jogos:
+        embeds = []
+        for titulo, link, imagem in jogos:
+            embeds.append({
+                "title": f"🎮 {titulo}",
+                "description": f"🆓 Grátis agora na Epic Games!\n🔗 [Resgatar aqui]({link})",
+                "image": {"url": imagem},
+                "color": 16753920
+            })
+
         payload = {
-            "content": "🎁 Novo jogo grátis disponível!",
-            "embeds": [embed]
+            "content": f"🎁 Jogos grátis disponíveis na Epic essa semana ({len(jogos)}):",
+            "embeds": embeds
         }
     else:
         payload = {
-            "content": "❗ Não consegui buscar o jogo grátis dessa semana. Verifica manualmente: https://store.epicgames.com/pt-BR/free-games"
+            "content": "❗ Nenhum jogo grátis encontrado no momento. Verifica manualmente: https://store.epicgames.com/pt-BR/free-games"
         }
 
     r = requests.post(webhook_url, json=payload)
