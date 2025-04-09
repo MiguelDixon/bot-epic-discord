@@ -21,7 +21,6 @@ def buscar_jogos_gratis_semana():
 
     jogos = dados['data']['Catalog']['searchStore']['elements']
     agora = datetime.datetime.now(datetime.timezone.utc)
-
     jogos_gratis = []
 
     for jogo in jogos:
@@ -29,16 +28,12 @@ def buscar_jogos_gratis_semana():
         if not promocoes:
             continue
 
-        todas_ofertas = []
-        if promocoes.get('promotionalOffers'):
-            todas_ofertas += promocoes['promotionalOffers']
-        if promocoes.get('upcomingPromotionalOffers'):
-            todas_ofertas += promocoes['upcomingPromotionalOffers']
-
-        for grupo in todas_ofertas:
+        ofertas = promocoes.get('promotionalOffers', []) + promocoes.get('upcomingPromotionalOffers', [])
+        
+        for grupo in ofertas:
             for oferta in grupo.get('promotionalOffers', []):
-                inicio = datetime.datetime.fromisoformat(oferta['startDate'].replace('Z', '+00:00'))
-                fim = datetime.datetime.fromisoformat(oferta['endDate'].replace('Z', '+00:00'))
+                inicio = datetime.datetime.now(datetime.timezone.utc)(oferta['startDate'].replace('Z', '+00:00')) 
+                fim = datetime.datetime.now(datetime.timezone.utc)(oferta['endDate'].replace('Z', '+00:00')) 
 
                 if inicio <= agora <= fim:
                     desconto = oferta.get('discountSetting', {}).get('discountPercentage', 0)
