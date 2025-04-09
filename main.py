@@ -1,7 +1,6 @@
 from flask import Flask
 from threading import Thread
 import requests
-import datetime
 from datetime import datetime, timezone
 
 
@@ -21,7 +20,7 @@ def buscar_jogos_gratis_semana():
     response = requests.get(url)
     dados = response.json()
 
-    agora = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
+    agora = datetime.utcnow().replace(tzinfo=timezone.utc)
     jogos = dados['data']['Catalog']['searchStore']['elements']
 
     jogos_gratis = []
