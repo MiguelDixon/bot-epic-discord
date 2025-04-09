@@ -20,7 +20,7 @@ def buscar_jogo_gratis_epic():
     dados = response.json()
 
     jogos = dados['data']['Catalog']['searchStore']['elements']
-    agora = datetime.datetime.utcnow()
+    agora = datetime.datetime.now(datetime.timezone.utc)  # ✅ timezone-aware agora
 
     for jogo in jogos:
         promocoes = jogo.get('promotions')
