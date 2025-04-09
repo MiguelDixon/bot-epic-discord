@@ -2,6 +2,8 @@ from flask import Flask
 from threading import Thread
 import requests
 import datetime
+from datetime import datetime, timezone
+
 
 app = Flask(__name__)
 
@@ -32,8 +34,9 @@ def buscar_jogos_gratis_semana():
         
         for grupo in ofertas:
             for oferta in grupo.get('promotionalOffers', []):
-                inicio = datetime.datetime.now(datetime.timezone.utc)(oferta['startDate'].replace('Z', '+00:00')) 
-                fim = datetime.datetime.now(datetime.timezone.utc)(oferta['endDate'].replace('Z', '+00:00')) 
+                inicio = datetime.fromisoformat(oferta['startDate'].replace('Z', '+00:00'))
+                fim = datetime.fromisoformat(oferta['endDate'].replace('Z', '+00:00'))
+                agora = datetime.now(timezone.utc)
 
                 if inicio <= agora <= fim:
                     desconto = oferta.get('discountSetting', {}).get('discountPercentage', 0)
