@@ -3,7 +3,6 @@ from threading import Thread
 import requests
 from datetime import datetime, timezone
 
-
 app = Flask(__name__)
 
 @app.route('/')
@@ -24,7 +23,7 @@ def buscar_jogos_gratis_semana():
     jogos = dados['data']['Catalog']['searchStore']['elements']
 
     jogos_gratis = []
-    
+
     for jogo in jogos:
         promocoes = jogo.get('promotions')
         if not promocoes:
@@ -36,7 +35,7 @@ def buscar_jogos_gratis_semana():
 
         for oferta in ofertas_ativas[0]['promotionalOffers']:
             inicio = datetime.fromisoformat(oferta['startDate'].replace('Z', '+00:00'))
-            fim = datetime.datetime.fromisoformat(oferta['endDate'].replace('Z', '+00:00'))
+            fim = datetime.fromisoformat(oferta['endDate'].replace('Z', '+00:00'))
 
             if inicio <= agora <= fim:
                 titulo = jogo['title']
@@ -60,7 +59,7 @@ def buscar_jogos_gratis_semana():
                 })
 
     return jogos_gratis
-    
+
 def enviar_mensagem_discord():
     webhook_url = 'https://discord.com/api/webhooks/1359351359081681036/n7yVuIwZv4Hnrt3eUol18-x5i3ytid5Mjmhd4ajQK0GEvDvVPmTH5EwLOu_4rYaXjhjS'
     jogos = buscar_jogos_gratis_semana()
@@ -70,8 +69,8 @@ def enviar_mensagem_discord():
             mensagem = {
                 "embeds": [
                     {
-                        "title": f"🎮 Jogo grátis da semana: {jogo['titulo']}",
-                        "description": f"🔗 [Resgatar agora]({jogo['link']})",
+                        "title": f"\ud83c\udfae Jogo grátis da semana: {jogo['titulo']}",
+                        "description": f"\ud83d\udd17 [Resgatar agora]({jogo['link']})",
                         "image": {
                             "url": jogo['imagem']
                         },
@@ -79,16 +78,15 @@ def enviar_mensagem_discord():
                     }
                 ]
             }
-            requests.post(webhook_url, json=mensagem)
+            r = requests.post(webhook_url, json=mensagem)
+            print("✅ Mensagem enviada pro Discord! Status:", r.status_code)
     else:
         mensagem = {
             "content": "❗ Nenhum jogo grátis encontrado no momento. Verifica manualmente: https://store.epicgames.com/pt-BR/free-games"
         }
-        requests.post(webhook_url, json=mensagem)
-
-    print("✅ Mensagem enviada pro Discord! Status:", r.status_code)
+        r = requests.post(webhook_url, json=mensagem)
+        print("⚠️ Aviso enviado: Nenhum jogo ativo. Status:", r.status_code)
 
 hoje = datetime.today().weekday()
-
 if True:
     enviar_mensagem_discord()
