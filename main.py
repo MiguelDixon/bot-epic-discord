@@ -15,6 +15,9 @@ def run_web():
 Thread(target=run_web).start()
 
 def enviar_mensagem_discord():
+    mensagem = {
+    "content": "@everyone 🚨 TESTE DE ALERTA DE JOGO GRÁTIS! Alguém aí tá vivo?"
+     }
     webhook_url = 'https://discord.com/api/webhooks/1359351359081681036/n7yVuIwZv4Hnrt3eUol18-x5i3ytid5Mjmhd4ajQK0GEvDvVPmTH5EwLOu_4rYaXjhjS'
     agora = datetime.datetime.utcnow()
 
