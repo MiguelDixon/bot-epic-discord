@@ -34,7 +34,7 @@ def buscar_jogo_gratis_epic():
 
 # ======== ENVIAR MENSAGEM PRO WEBHOOK ========
 def enviar_mensagem_discord():
-    webhook_url = 'COLE_SEU_WEBHOOK_AQUI'
+    webhook_url = 'https://discord.com/api/webhooks/1359351359081681036/n7yVuIwZv4Hnrt3eUol18-x5i3ytid5Mjmhd4ajQK0GEvDvVPmTH5EwLOu_4rYaXjhjS'
     titulo, link = buscar_jogo_gratis_epic()
 
     if titulo and link:
