@@ -4,9 +4,7 @@ import requests
 from datetime import datetime, timezone
 import schedule
 import time
-import pytz
 
-# === Servidor Flask para manter vivo ===
 app = Flask(__name__)
 
 @app.route('/')
@@ -18,7 +16,6 @@ def run_web():
 
 Thread(target=run_web).start()
 
-# === Busca os jogos grátis da semana na Epic ===
 def buscar_jogos_gratis_semana():
     url = "https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=pt-BR&country=BR"
     response = requests.get(url)
@@ -64,7 +61,6 @@ def buscar_jogos_gratis_semana():
 
     return jogos_gratis
 
-# === Envia mensagem no webhook do Discord ===
 def enviar_mensagem_discord():
     webhook_url = 'https://discord.com/api/webhooks/1359351359081681036/n7yVuIwZv4Hnrt3eUol18-x5i3ytid5Mjmhd4ajQK0GEvDvVPmTH5EwLOu_4rYaXjhjS'
     jogos = buscar_jogos_gratis_semana()
@@ -72,6 +68,7 @@ def enviar_mensagem_discord():
     if jogos:
         for jogo in jogos:
             mensagem = {
+                "content": "@everyone",
                 "embeds": [
                     {
                         "title": f"🎮 Jogo grátis da semana: {jogo['titulo']}",
@@ -87,22 +84,14 @@ def enviar_mensagem_discord():
             print("✅ Mensagem enviada pro Discord! Status:", r.status_code)
     else:
         mensagem = {
-            "content": "❗ Nenhum jogo grátis encontrado no momento. Verifica manualmente: https://store.epicgames.com/pt-BR/free-games"
+            "content": "@everyone ❗ Nenhum jogo grátis encontrado no momento. Verifica manualmente: https://store.epicgames.com/pt-BR/free-games"
         }
         r = requests.post(webhook_url, json=mensagem)
         print("⚠️ Nenhum jogo encontrado. Status:", r.status_code)
 
-# === Agenda pra toda quinta-feira às 13h (horário BR) ===
-def checar_quinta_e_enviar():
-    fuso_brasil = pytz.timezone('America/Sao_Paulo')
-    agora = datetime.now(fuso_brasil)
-    if agora.weekday() == 3:  # 3 = quinta
-        print("📆 Quinta-feira detectada, enviando jogos...")
-        enviar_mensagem_discord()
+# Agendamento pra quinta-feira 13:00
+schedule.every().thursday.at("13:00").do(enviar_mensagem_discord)
 
-schedule.every().thursday.at("13:00").do(checar_quinta_e_enviar)
-
-# === Loop infinito pra verificar agendamento ===
 while True:
     schedule.run_pending()
-    time.sleep(60)
+    time.sleep(1)
