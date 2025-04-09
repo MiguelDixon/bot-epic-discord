@@ -21,60 +21,71 @@ def buscar_jogos_gratis_semana():
     response = requests.get(url)
     dados = response.json()
 
+    agora = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
     jogos = dados['data']['Catalog']['searchStore']['elements']
-    agora = datetime.now(timezone.utc)
-    jogos_gratis = []
 
+    jogos_gratis = []
+    
     for jogo in jogos:
         promocoes = jogo.get('promotions')
         if not promocoes:
             continue
 
-        ofertas = promocoes.get('promotionalOffers', []) + promocoes.get('upcomingPromotionalOffers', [])
-        
-        for grupo in ofertas:
-            for oferta in grupo.get('promotionalOffers', []):
-                inicio = datetime.fromisoformat(oferta['startDate'].replace('Z', '+00:00'))
-                fim = datetime.fromisoformat(oferta['endDate'].replace('Z', '+00:00'))
-                agora = datetime.now(timezone.utc)
+        ofertas_ativas = promocoes.get('promotionalOffers')
+        if not ofertas_ativas or not ofertas_ativas[0]['promotionalOffers']:
+            continue
 
-                if inicio <= agora <= fim:
-                    desconto = oferta.get('discountSetting', {}).get('discountPercentage', 0)
-                    if desconto == 100:
-                        titulo = jogo['title']
-                        imagem = jogo['keyImages'][0]['url']
-                        try:
-                            slug = jogo['catalogNs']['mappings'][0]['pageSlug']
-                            link = f"https://store.epicgames.com/pt-BR/p/{slug}"
-                        except:
-                            link = "https://store.epicgames.com/pt-BR/free-games"
-                        jogos_gratis.append((titulo, link, imagem))
+        for oferta in ofertas_ativas[0]['promotionalOffers']:
+            inicio = datetime.datetime.fromisoformat(oferta['startDate'].replace('Z', '+00:00'))
+            fim = datetime.datetime.fromisoformat(oferta['endDate'].replace('Z', '+00:00'))
+
+            if inicio <= agora <= fim:
+                titulo = jogo['title']
+                try:
+                    slug = jogo['catalogNs']['mappings'][0]['pageSlug']
+                    link = f"https://store.epicgames.com/pt-BR/p/{slug}"
+                except:
+                    link = "https://store.epicgames.com/pt-BR/free-games"
+
+                # imagem de capa
+                capa = ""
+                for img in jogo['keyImages']:
+                    if img['type'] == 'DieselStoreFrontWide':
+                        capa = img['url']
+                        break
+
+                jogos_gratis.append({
+                    'titulo': titulo,
+                    'link': link,
+                    'imagem': capa
+                })
 
     return jogos_gratis
+    
 def enviar_mensagem_discord():
     webhook_url = 'https://discord.com/api/webhooks/1359351359081681036/n7yVuIwZv4Hnrt3eUol18-x5i3ytid5Mjmhd4ajQK0GEvDvVPmTH5EwLOu_4rYaXjhjS'
     jogos = buscar_jogos_gratis_semana()
 
-    if jogos:
-        embeds = []
-        for titulo, link, imagem in jogos:
-            embeds.append({
-                "title": f"🎮 {titulo}",
-                "description": f"🆓 Grátis agora na Epic Games!\n🔗 [Resgatar aqui]({link})",
-                "image": {"url": imagem},
-                "color": 16753920
-            })
-
-        payload = {
-            "content": f"🎁 Jogos grátis disponíveis na Epic essa semana ({len(jogos)}):",
-            "embeds": embeds
-        }
+     if jogos:
+        for jogo in jogos:
+            mensagem = {
+                "embeds": [
+                    {
+                        "title": f"🎮 Jogo grátis da semana: {jogo['titulo']}",
+                        "description": f"🔗 [Resgatar agora]({jogo['link']})",
+                        "image": {
+                            "url": jogo['imagem']
+                        },
+                        "color": 0x00ff00
+                    }
+                ]
+            }
+            requests.post(webhook_url, json=mensagem)
     else:
-        payload = {
+        mensagem = {
             "content": "❗ Nenhum jogo grátis encontrado no momento. Verifica manualmente: https://store.epicgames.com/pt-BR/free-games"
         }
-
-    r = requests.post(webhook_url, json=payload)
+        requests.post(webhook_url, json=mensagem)
     print("✅ Mensagem enviada pro Discord! Status:", r.status_code)
 
 hoje = datetime.today().weekday()
