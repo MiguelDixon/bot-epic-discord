@@ -20,18 +20,27 @@ def buscar_jogo_gratis_epic():
     dados = response.json()
 
     jogos = dados['data']['Catalog']['searchStore']['elements']
+    agora = datetime.datetime.utcnow()
+
     for jogo in jogos:
-        if jogo.get('promotions'):
-            promocoes_ativas = jogo['promotions'].get('promotionalOffers')
-            if promocoes_ativas:
-                titulo = jogo['title']
-                # Corrigindo o link — pega o primeiro mapeamento da loja
-                try:
-                    slug = jogo['catalogNs']['mappings'][0]['pageSlug']
-                    link = f"https://store.epicgames.com/pt-BR/p/{slug}"
-                except:
-                    link = "https://store.epicgames.com/pt-BR/free-games"
-                return titulo, link
+        promocoes = jogo.get('promotions')
+        if not promocoes:
+            continue
+
+        ofertas_ativas = promocoes.get('promotionalOffers')
+        if ofertas_ativas:
+            for oferta in ofertas_ativas[0]['promotionalOffers']:
+                inicio = datetime.datetime.fromisoformat(oferta['startDate'].replace('Z', '+00:00'))
+                fim = datetime.datetime.fromisoformat(oferta['endDate'].replace('Z', '+00:00'))
+
+                if inicio <= agora <= fim:
+                    titulo = jogo['title']
+                    try:
+                        slug = jogo['catalogNs']['mappings'][0]['pageSlug']
+                        link = f"https://store.epicgames.com/pt-BR/p/{slug}"
+                    except:
+                        link = "https://store.epicgames.com/pt-BR/free-games"
+                    return titulo, link
     return None, None
 
 def enviar_mensagem_discord():
