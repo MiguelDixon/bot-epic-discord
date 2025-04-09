@@ -51,5 +51,5 @@ def enviar_mensagem_discord():
 
 # ======== EXECUTA APENAS SE FOR QUINTA ========
 hoje = datetime.datetime.today().weekday()
-if hoje:  # 3 = quinta-feira
+if True:  # 3 = quinta-feira
     enviar_mensagem_discord()
