@@ -31,6 +31,8 @@ async def on_ready():
     print(f'Logado como {bot.user}')
 
 # Outros comandos e eventos aqui
+# if datetime.datetime.today().weekday() == 3:  # Quinta-feira (3)
+if True:  # Força a execução sempre que rodar
 
 # Iniciar o bot
 bot.run(TOKEN)
