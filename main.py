@@ -3,7 +3,7 @@ from threading import Thread
 import requests
 import datetime
 
-# ======== KEEP ALIVE (Render) ========
+# ======== KEEP ALIVE (para o Render) ========
 app = Flask(__name__)
 
 @app.route('/')
@@ -15,7 +15,7 @@ def run_web():
 
 Thread(target=run_web).start()
 
-# ======== FUNÇÃO PARA PEGAR O JOGO GRÁTIS DA EPIC ========
+# ======== PEGAR JOGO GRÁTIS DA EPIC GAMES ========
 def buscar_jogo_gratis_epic():
     url = "https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=pt-BR"
     response = requests.get(url)
@@ -32,14 +32,14 @@ def buscar_jogo_gratis_epic():
     except:
         return None, None
 
-# ======== ENVIAR MENSAGEM PRO WEBHOOK ========
+# ======== ENVIAR PARA WEBHOOK DO DISCORD ========
 def enviar_mensagem_discord():
     webhook_url = 'https://discord.com/api/webhooks/1359351359081681036/n7yVuIwZv4Hnrt3eUol18-x5i3ytid5Mjmhd4ajQK0GEvDvVPmTH5EwLOu_4rYaXjhjS'
     titulo, link = buscar_jogo_gratis_epic()
 
     if titulo and link:
         mensagem = {
-            "content": f"🎮 **Jogo grátis da semana na Epic!**\n🕹️ {titulo}\n🔗 {link}"
+            "content": f"🎮 **Jogo grátis da semana na Epic Games!**\n🕹️ {titulo}\n🔗 {link}"
         }
     else:
         mensagem = {
@@ -47,9 +47,9 @@ def enviar_mensagem_discord():
         }
 
     requests.post(webhook_url, json=mensagem)
-    print("Mensagem enviada!")
+    print("✅ Mensagem enviada pro Discord!")
 
-# ======== VERIFICAR SE É QUINTA-FEIRA ========
+# ======== EXECUTA APENAS SE FOR QUINTA ========
 hoje = datetime.datetime.today().weekday()
-if true:  # 3 = quinta-feira
+if hoje:  # 3 = quinta-feira
     enviar_mensagem_discord()
