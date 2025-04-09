@@ -77,6 +77,7 @@ def enviar_mensagem_discord():
     r = requests.post(webhook_url, json=payload)
     print("✅ Mensagem enviada pro Discord! Status:", r.status_code)
 
-hoje = datetime.datetime.today().weekday()
+hoje = datetime.today().weekday()
+
 if True:
     enviar_mensagem_discord()
