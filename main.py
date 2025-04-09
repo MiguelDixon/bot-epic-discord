@@ -3,7 +3,6 @@ from threading import Thread
 import requests
 import datetime
 
-# ======== KEEP ALIVE (para o Render) ========
 app = Flask(__name__)
 
 @app.route('/')
@@ -15,24 +14,26 @@ def run_web():
 
 Thread(target=run_web).start()
 
-# ======== PEGAR JOGO GRÁTIS DA EPIC GAMES ========
 def buscar_jogo_gratis_epic():
-    url = "https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=pt-BR"
+    url = "https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=pt-BR&country=BR"
     response = requests.get(url)
     dados = response.json()
 
-    try:
-        jogos = dados['data']['Catalog']['searchStore']['elements']
-        for jogo in jogos:
-            if jogo.get('promotions') and jogo['promotions'].get('promotionalOffers'):
+    jogos = dados['data']['Catalog']['searchStore']['elements']
+    for jogo in jogos:
+        if jogo.get('promotions'):
+            promocoes_ativas = jogo['promotions'].get('promotionalOffers')
+            if promocoes_ativas:
                 titulo = jogo['title']
-                slug = jogo['productSlug']
-                link = f"https://store.epicgames.com/pt-BR/p/{slug}"
+                # Corrigindo o link — pega o primeiro mapeamento da loja
+                try:
+                    slug = jogo['catalogNs']['mappings'][0]['pageSlug']
+                    link = f"https://store.epicgames.com/pt-BR/p/{slug}"
+                except:
+                    link = "https://store.epicgames.com/pt-BR/free-games"
                 return titulo, link
-    except:
-        return None, None
+    return None, None
 
-# ======== ENVIAR PARA WEBHOOK DO DISCORD ========
 def enviar_mensagem_discord():
     webhook_url = 'https://discord.com/api/webhooks/1359351359081681036/n7yVuIwZv4Hnrt3eUol18-x5i3ytid5Mjmhd4ajQK0GEvDvVPmTH5EwLOu_4rYaXjhjS'
     titulo, link = buscar_jogo_gratis_epic()
@@ -49,7 +50,6 @@ def enviar_mensagem_discord():
     requests.post(webhook_url, json=mensagem)
     print("✅ Mensagem enviada pro Discord!")
 
-# ======== EXECUTA APENAS SE FOR QUINTA ========
 hoje = datetime.datetime.today().weekday()
-if True:  # 3 = quinta-feira
+if True:
     enviar_mensagem_discord()
