@@ -66,7 +66,7 @@ def enviar_mensagem_discord():
     webhook_url = 'https://discord.com/api/webhooks/1359351359081681036/n7yVuIwZv4Hnrt3eUol18-x5i3ytid5Mjmhd4ajQK0GEvDvVPmTH5EwLOu_4rYaXjhjS'
     jogos = buscar_jogos_gratis_semana()
 
-     if jogos:
+    if jogos:
         for jogo in jogos:
             mensagem = {
                 "embeds": [
@@ -86,6 +86,7 @@ def enviar_mensagem_discord():
             "content": "❗ Nenhum jogo grátis encontrado no momento. Verifica manualmente: https://store.epicgames.com/pt-BR/free-games"
         }
         requests.post(webhook_url, json=mensagem)
+
     print("✅ Mensagem enviada pro Discord! Status:", r.status_code)
 
 hoje = datetime.today().weekday()
