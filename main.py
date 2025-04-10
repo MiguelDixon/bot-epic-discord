@@ -48,9 +48,14 @@ def buscar_jogos_gratis_semana():
                     link = "https://store.epicgames.com/pt-BR/free-games"
 
                 capa = ""
-                for img in jogo['keyImages']:
-                    if img['type'] == 'DieselStoreFrontWide':
-                        capa = img['url']
+                tipos_preferidos = ["DieselStoreFrontWide", "DieselGameBox", "OfferImageWide"]
+
+                for tipo in tipos_preferidos:
+                    for img in jogo['keyImages']:
+                        if img['type'] == tipo:
+                            capa = img['url']
+                            break
+                    if capa:
                         break
 
                 jogos_gratis.append({
@@ -67,36 +72,11 @@ def enviar_mensagem_discord():
 
     if jogos:
         for jogo in jogos:
-            mensagem = {
-                "content": "@everyone",
-                "embeds": [
-                    {
-                        "title": f"🎮 Jogo grátis da semana: {jogo['titulo']}",
-                        "description": f"🔗 [Resgatar agora]({jogo['link']})",
-                        "image": {
-                            "url": jogo['imagem']
-                        },
-                        "color": 0x00ff00
-                    }
-                ]
+            embed = {
+                "title": f"🎮 Jogo grátis da semana: {jogo['titulo']}",
+                "description": f"🔗 [Resgatar agora]({jogo['link']})",
+                "color": 0x00ff00
             }
-            r = requests.post(webhook_url, json=mensagem)
-            print("✅ Mensagem enviada pro Discord! Status:", r.status_code)
-    else:
-        mensagem = {
-            "content": "@everyone ❗ Nenhum jogo grátis encontrado no momento. Verifica manualmente: https://store.epicgames.com/pt-BR/free-games"
-        }
-        r = requests.post(webhook_url, json=mensagem)
-        print("⚠️ Nenhum jogo encontrado. Status:", r.status_code)
 
-# Agendamento pra quinta-feira 13:00
-schedule.every().thursday.at("16:00").do(enviar_mensagem_discord)
-
-# Executa agora, só pra teste
-if __name__ == "__main__":
-    enviar_mensagem_discord()
-
-# Loop de agendamento contínuo
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+            if jogo['imagem']:
+                embed["image"] = {"
