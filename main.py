@@ -48,14 +48,9 @@ def buscar_jogos_gratis_semana():
                     link = "https://store.epicgames.com/pt-BR/free-games"
 
                 capa = ""
-                tipos_preferidos = ["DieselStoreFrontWide", "DieselGameBox", "OfferImageWide"]
-
-                for tipo in tipos_preferidos:
-                    for img in jogo['keyImages']:
-                        if img['type'] == tipo:
-                            capa = img['url']
-                            break
-                    if capa:
+                for img in jogo['keyImages']:
+                    if img['type'] == 'DieselStoreFrontWide':
+                        capa = img['url']
                         break
 
                 jogos_gratis.append({
@@ -79,4 +74,32 @@ def enviar_mensagem_discord():
             }
 
             if jogo['imagem']:
-                embed["image"] = {"
+                embed["image"] = {
+                    "url": jogo['imagem']
+                }
+
+            mensagem = {
+                "content": "@everyone",
+                "embeds": [embed]
+            }
+
+            r = requests.post(webhook_url, json=mensagem)
+            print("✅ Mensagem enviada pro Discord! Status:", r.status_code)
+    else:
+        mensagem = {
+            "content": "@everyone ❗ Nenhum jogo grátis encontrado no momento. Verifica manualmente: https://store.epicgames.com/pt-BR/free-games"
+        }
+        r = requests.post(webhook_url, json=mensagem)
+        print("⚠️ Nenhum jogo encontrado. Status:", r.status_code)
+
+# Agendamento pra quinta-feira 13:00
+schedule.every().thursday.at("13:00").do(enviar_mensagem_discord)
+
+# Executa agora, só pra teste
+if __name__ == "__main__":
+    enviar_mensagem_discord()
+
+# Loop de agendamento contínuo
+while True:
+    schedule.run_pending()
+    time.sleep(1)
