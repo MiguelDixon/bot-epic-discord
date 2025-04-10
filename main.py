@@ -95,3 +95,6 @@ schedule.every().thursday.at("16:00").do(enviar_mensagem_discord)
 while True:
     schedule.run_pending()
     time.sleep(1)
+
+if __name__ == "__main__":
+    enviar_mensagem_discord()
