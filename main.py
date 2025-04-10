@@ -92,9 +92,9 @@ def enviar_mensagem_discord():
 # Agendamento pra quinta-feira 13:00
 schedule.every().thursday.at("16:00").do(enviar_mensagem_discord)
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
 if __name__ == "__main__":
     enviar_mensagem_discord()
