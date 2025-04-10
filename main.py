@@ -90,7 +90,7 @@ def enviar_mensagem_discord():
         print("⚠️ Nenhum jogo encontrado. Status:", r.status_code)
 
 # Agendamento pra quinta-feira 13:00
-schedule.every().thursday.at("13:00").do(enviar_mensagem_discord)
+schedule.every().thursday.at("16:00").do(enviar_mensagem_discord)
 
 while True:
     schedule.run_pending()
