@@ -47,16 +47,16 @@ def buscar_jogos_gratis_semana():
                 except:
                     link = "https://store.epicgames.com/pt-BR/free-games"
 
-                capa = ""
+                capa = None
                 for img in jogo['keyImages']:
-                    if img['type'] == 'DieselStoreFrontWide':
+                    if img['type'] in ['DieselStoreFrontWide', 'OfferImageWide', 'OfferImageTall']:
                         capa = img['url']
                         break
 
                 jogos_gratis.append({
                     'titulo': titulo,
                     'link': link,
-                    'imagem': capa
+                    'imagem': capa or "https://cdn2.unrealengine.com/egs-freegames-weekly-1920x1080-1920x1080-02abc25b0b96.jpg"
                 })
 
     return jogos_gratis
@@ -67,10 +67,6 @@ def enviar_mensagem_discord():
 
     if jogos:
         for jogo in jogos:
-            imagem = jogo['imagem']
-            if not imagem or not imagem.endswith(('.png', '.jpg', '.jpeg', '.webp')):
-                imagem = "https://i.imgur.com/OWkJt1w.png"  # Imagem de fallback
-
             mensagem = {
                 "content": "@everyone",
                 "embeds": [
@@ -78,7 +74,7 @@ def enviar_mensagem_discord():
                         "title": f"🎮 Jogo grátis da semana: {jogo['titulo']}",
                         "description": f"🔗 [Resgatar agora]({jogo['link']})",
                         "image": {
-                            "url": imagem
+                            "url": jogo['imagem']
                         },
                         "color": 0x00ff00
                     }
