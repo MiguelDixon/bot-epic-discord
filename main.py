@@ -93,8 +93,6 @@ def enviar_mensagem_discord():
 # Ajuste para usar o fuso horário de Brasília
 brasil_tz = pytz.timezone('America/Sao_Paulo')
 schedule.every().thursday.at("13:00").do(enviar_mensagem_discord)
-# Rodar o envio manualmente para o teste
-enviar_mensagem_discord()  # Força o envio imediato
 
 # Loop contínuo
 while True:
