@@ -4,6 +4,7 @@ import requests
 from datetime import datetime, timezone
 import schedule
 import time
+import pytz
 
 app = Flask(__name__)
 
@@ -89,10 +90,12 @@ def enviar_mensagem_discord():
         r = requests.post(webhook_url, json=mensagem)
         print("⚠️ Nenhum jogo encontrado. Status:", r.status_code)
 
-# Agendamento pra quinta-feira 13:00
-schedule.every().thursday.at("16:00").do(enviar_mensagem_discord)
+# Ajuste para usar o fuso horário de Brasília
+brasil_tz = pytz.timezone('America/Sao_Paulo')
+schedule.every().thursday.at("13:00").do(enviar_mensagem_discord)
 
 # Loop contínuo
 while True:
     schedule.run_pending()
     time.sleep(1)
+
