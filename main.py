@@ -94,9 +94,6 @@ def enviar_mensagem_discord():
 brasil_tz = pytz.timezone('America/Sao_Paulo')
 schedule.every().thursday.at("13:00").do(enviar_mensagem_discord)
 
-# TESTE: Força execução independente do dia
-enviar_mensagem_discord()
-
 # Loop contínuo
 while True:
     schedule.run_pending()
